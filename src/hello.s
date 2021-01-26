@@ -26,10 +26,8 @@ _i:
 
 .segment	"RODATA"
 
-L004C:
-	.byte	$25,$73,$20,$31,$36,$35,$9B,$00
 L003B:
-	.byte	$25,$73,$20,$25,$69,$7F,$00
+	.byte	$25,$73,$9B,$00
 
 ; ---------------------------------------------------------------
 ; int __near__ main (void)
@@ -47,12 +45,12 @@ L003B:
 	lda     #$00
 	jsr     _bgcolor
 ;
-; POKEW(709,56);  // set text color.  708 is memory address for color reg # 0.  
+; POKEW(710,192);  // set text color.  710 is memory address for color reg # 2.  
 ;
 	ldx     #$00
-	lda     #$38
-	sta     $02C5
-	stx     $02C5+1
+	lda     #$C0
+	sta     $02C6
+	stx     $02C6+1
 ;
 ; clrscr();  // clear the screen
 ;
@@ -70,10 +68,11 @@ L0030:	lda     _i
 	bvc     L0037
 	eor     #$80
 L0037:	asl     a
-	ldx     #$00
-	bcc     L0052
+	lda     #$00
+	tax
+	bcc     L0042
 ;
-; printf("%s %i\t", text, i);
+; printf("%s\n", text);
 ;
 	lda     #<(L003B)
 	ldx     #>(L003B)
@@ -81,18 +80,8 @@ L0037:	asl     a
 	lda     #<(_text)
 	ldx     #>(_text)
 	jsr     pushax
-	lda     _i
-	ldx     _i+1
-	jsr     pushax
-	ldy     #$06
+	ldy     #$04
 	jsr     _printf
-;
-; POKEW(710,i);  // set text color.  708 is memory address for color reg # 0.  
-;
-	lda     _i+1
-	sta     $02C6+1
-	lda     _i
-	sta     $02C6
 ;
 ; sleep(1);   // x seconds
 ;
@@ -112,37 +101,9 @@ L0039:	sta     _i
 	stx     _i+1
 	jmp     L0030
 ;
-; POKEW(710,165);  // set text color.  710 is memory address for color reg # 2.  This should be green on black  
-;
-L0052:	lda     #$A5
-	sta     $02C6
-	stx     $02C6+1
-;
-; printf("%s 165\n", text);
-;
-	lda     #<(L004C)
-	ldx     #>(L004C)
-	jsr     pushax
-	lda     #<(_text)
-	ldx     #>(_text)
-	jsr     pushax
-	ldy     #$04
-	jsr     _printf
-;
-; sleep(10);   // 10 seconds
-;
-	ldx     #$00
-	lda     #$0A
-	jsr     _sleep
-;
-; return EXIT_SUCCESS;
-;
-	ldx     #$00
-	txa
-;
 ; }
 ;
-	rts
+L0042:	rts
 
 .endproc
 
