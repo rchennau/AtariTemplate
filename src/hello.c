@@ -1,7 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <conio.h>
 #include <peekpoke.h>
 
 extern const char text[]; /* Defined In text.s file.  Benefit is to externalize text strings and optimize memory and file size */   
