@@ -1,0 +1,12 @@
+{
+    "C_Cpp.default.includePath": [
+        "/usr/local/share/cc65/include"
+    ],
+    "C_Cpp.default.systemIncludePath": [
+        "/usr/local/share/cc65/include"
+    ],
+    "clangd.path": "/usr/bin/clangd",
+    "files.associations": {
+        "stdio.h": "c"
+    }
+}
