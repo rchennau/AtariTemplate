@@ -7,13 +7,15 @@
 ### In order to override defaults - values can be assigned to the variables ###
 ###############################################################################
 
-# Space or comma separated list of cc65 supported target platforms to build for.
-# Default: atari (lowercase!)
+# Name of the application unless and override is present in PROGRAM
+BASENAME  := $(shell basename $(PWD))
+
+# Override for target platform.  Default is atari
 TARGETS := 
 
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
-PROGRAM :=
+PROGRAM := 
 
 # Path(s) to additional libraries required for linking the program
 # Use only if you don't want to place copies of the libraries in SRCDIR
@@ -134,8 +136,12 @@ endif
 # Presume we're in a project directory so name the program like the current
 # directory. Set PROGRAM to override.
 ifeq ($(PROGRAM),)
-  PROGRAM := $(notdir $(CURDIR))
+  # PROGRAM := $(notdir $(CURDIR))
+  # makefile does not handle spaces in a director well. Workaround is to use $(shell pwd)
+  # PROGRAM := $(patsubst %/.*,%,$^) 
+  PROGRAM := $(patsubst %/,%,$(shell pwd))
 endif
+
 
 # Presume we're in a project directory 
 # Set BUILD to override.
@@ -215,7 +221,8 @@ TARGETLIST := $(subst $(COMMA),$(SPACE),$(TARGETS))
 ifeq ($(words $(TARGETLIST)),1)
 
 # Set PROGRAM to something like 'myprog.c64'.
-override PROGRAM := $(PROGRAM).$(TARGETLIST)
+# override PROGRAM := 
+# override PROGRAM := $(PROGRAM).$(TARGETLIST)
 
 # Set SOURCES to something like 'src/foo.c src/bar.s'.
 # Use of assembler files with names ending differently than .s is deprecated!
@@ -314,10 +321,9 @@ $(TARGETOBJDIR)/%.o: %.a65 | $(TARGETOBJDIR)
 	cl65 -t $(CC65TARGET) -c --create-dep $(@:.o=.d) $(ASFLAGS) -o $@ $<
 
 $(PROGRAM): $(CONFIG) $(OBJECTS) $(LIBS)
-	cl65 -t $(CC65TARGET) $(LDFLAGS) -o $(BUILD)/$@.xex $(patsubst %.cfg,-C %.cfg,$^)
+	#cl65 -t $(CC65TARGET) $(LDFLAGS) -o $@ $(patsubst %.cfg,-C %.cfg,$^)
 
-# $(BUILD): $(PROGRAM) 
-#	mv $(PROGRAM) $(BUILD)/$(PROGRAM).xex
+	cl65 -t $(CC65TARGET) $(LDFLAGS) -o $(PWD)/$(BUILD)/$(BASENAME).xex $(patsubst %.cfg,-C %.cfg,$^) 
 
 test: $(PROGRAM)
 	$(PREEMUCMD)
@@ -328,7 +334,8 @@ clean:
 	$(call RMFILES,$(OBJECTS))
 	$(call RMFILES,$(DEPENDS))
 	$(call RMFILES,$(REMOVES))
-	rm -f $(BUILD)/$(PROGRAM).xex
+	$(call RMFILES,$(BUILD)/*)
+	$(call RMFILES,*.map)
 
 else # $(words $(TARGETLIST)),1
 
