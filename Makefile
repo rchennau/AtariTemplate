@@ -322,7 +322,6 @@ $(TARGETOBJDIR)/%.o: %.a65 | $(TARGETOBJDIR)
 
 $(PROGRAM): $(CONFIG) $(OBJECTS) $(LIBS)
 	#cl65 -t $(CC65TARGET) $(LDFLAGS) -o $@ $(patsubst %.cfg,-C %.cfg,$^)
-
 	cl65 -t $(CC65TARGET) $(LDFLAGS) -o $(PWD)/$(BUILD)/$(BASENAME).xex $(patsubst %.cfg,-C %.cfg,$^) 
 
 test: $(PROGRAM)
