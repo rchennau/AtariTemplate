@@ -1,76 +1,46 @@
-#include <stdio.h>
-#include <peekpoke.h>
-#include <string.h>
-#include <conio.h>
-#include <atari.h>
+#include <conio.h> // Include the conio.h library for screen manipulation
+#include <atari.h> // Include the atari.h library for memory manipulation
+#include <peekpoke.h> // Include the peekpoke.h library for memory manipulation
 
-void __fastcall__ str_to_internal(char *s);  // convert string in memory to internal character format Atasci
-
-extern const char text[]; /* Defined In text.s file.  Benefit is to externalize text strings and optimize memory and file size */   
-
-#pragma static-locals (1)  // Declare local variables as static and add them to the zero-page register of the target system
-
-#define SAVMSC *(unsigned int *) 88 // memory screen address dec 88 or hex 0x58 for the Atari
-
-typedef unsigned char BYTE;
-
-void wait(BYTE);
-void graphics2();
-
-
-BYTE i = 0; 
-
-int main (void) {
-
-	graphics2();
-	wait(50);
-	cprintf("This was it");
-	wait(50);
-	return 0;
+// Define the custom display list for the highest resolution on Atari 800
+const unsigned char displayList[] = {
+  0x01, // Set the display mode to 320x192 pixels (highest resolution)
+  0x00, // Set the character set to the default set
+  0x00, // Set the screen color to black
+  0x00, // Set the border color to black
+  0x00, // Set the background color to black
+  0x00, // Set the foreground color to white
+  0x00, // Set the character height to 8 pixels
+  0x00, // Set the character width to 8 pixels
+  0x00, // Set the character spacing to 0 pixels
+  0x00, // Set the line spacing to 0 pixels
+  0x00, // Set the scroll speed to 0
+  0x00, // Set the scroll direction to 0
+  0x00, // Set the cursor position to 0,0
+  0x00, // Set the cursor shape to 0
+  0x00, // Set the cursor color to 0
+  0x00, // Set the cursor blink rate to 0
+  0x00, // Set the cursor visibility to 0
+};
+// Function to set the display list
+void set_display_list(const unsigned char *displayList) {
+  // Load the display list into memory
+  int i;
+  for (i = 0; i < sizeof(displayList); i++) {
+    POKE(599 + i, displayList[i]);
+  }
+  POKE(599, 34); // Enable display list
 }
 
-void graphics2() {
-	BYTE i = 0;	
-	char *screen;			// initalize a pointer labled screen
-	char txt[15];			// create a var char labled txt and hold 16 bytes
+int main() {
+  // Set the display list
+  set_display_list(displayList);
 
-	_graphics(2);   		// change to gr.2
-	screen = (char *) SAVMSC;	// asign the screen address to a var	
-	
-	memcpy(txt, text, strlen(text)+1);		// Confusing but to convert to internal screen format we need a non-constant copy of our constant string	
-	str_to_internal(txt);		// convert content of text.s to internal screen format (Atasci)	
-	memcpy(&screen[20], txt, strlen(text));	// Copy the content of text to the pointer to the memory address labled screen (copy into RAM). 
-	
-	return;
-}
+  // Print "Hello World!" to the screen
+  cprintf("Hello World!");
 
-/***************************************
-*                    
-* Converts a string from atascii code to internal character set code.
-* Usually we want to do this before writing it to a bitmap 
-*/
-void __fastcall__ str_to_internal(char *s) {
-	// unsigned int i;
-	// unsigned int len;
-	BYTE i;
-	BYTE len;
+  // Wait for a key press
+  cgetc();
 
-	len = strlen(s);
-	for (i = 0; i < len; i++) {
-		if (s[i] < 32)
-			s[i] += 64;
-		else if (s[i] < 96)
-			s[i] -= 32;
-	}
-	return;
-}
-/*********************************************************************
- * wait a specified amount of time in msseconds                     **
- */
-
-void wait(BYTE t) {
-	OS.rtclok[0]=OS.rtclok[1]=OS.rtclok[2]=0; 
-	while (OS.rtclok[2]<t); { 
-		// twiddle thumbs 
-	}	
+  return 0;
 }
